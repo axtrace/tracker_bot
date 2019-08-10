@@ -20,12 +20,12 @@ class Tracker(object):
                                   description=description, ad_url=ad_url,
                                   price=price, phone=phone)
 
-    def find(self, request, filter=''):
+    def find(self, request, filter='', order=''):
         if filter == '':
             issues = self.client.issues.find(request)
-
         else:
-            issues = self.client.issues.find(filter=filter)
+            issues = self.client.issues.find(filter=filter,
+                                             order=order)
         return issues
 
 

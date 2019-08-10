@@ -1,6 +1,9 @@
 import telebot
 import time
-
+import pytz
+from dateutil.parser import parse
+from datetime import datetime
+from telebot import apihelper
 from token_loader import TokenLoader
 from url_manager import UrlManager
 from tracker import Tracker
@@ -22,7 +25,7 @@ def prepare_info(adv_info, url):
     res = dict()
     res['title'] = adv_info.get('title', 'Квартира')
     res['price'] = 0 if adv_info.get('price', 0) == '' else int(
-        adv_info.get('price', 0))
+        adv_info.get('price', 0)) / 1000
     res['phone'] = adv_info.get('phone', '')
     res['adv_id'] = adv_info.get('adv_id', '')
     res['build_year'] = adv_info.get('build_year', '')
@@ -30,10 +33,30 @@ def prepare_info(adv_info, url):
     return res
 
 
-def send_issues_list(chat_id, found_issues):
+def prepare_msg_by_issue(issue):
+    msg = issue.summary + '\n'
+    msg += tr.tracker_url + issue.key + '\n'
+    if issue.address is not None:
+        msg += issue.address + '\n'
+    if issue.phone is not None:
+        msg += issue.phone + '\n'
+    if issue.agentname is not None:
+        msg += issue.agentname + '\n'
+    if issue.datetimeview is not None and issue.datetimeview != '':
+        utc_datetime = datetime.strptime(issue.datetimeview,
+                                         '%Y-%m-%dT%H:%M:%S.%f%z')
+        msc_datetime = utc_datetime.astimezone(pytz.timezone('Europe/Moscow'))
+        msg += 'Дата и время просмотра: '
+        msg += msc_datetime.strftime(
+            "%d.%m.%Y %H:%M") + '\n'
+    if issue.ad_url is not None:
+        msg += issue.ad_url + '\n'
+    return msg
+
+
+def send_issues_list(chat_id, found_issues, ):
     for issue in found_issues:
-        bot.send_message(chat_id,
-                         issue.summary + '\n' + tr.tracker_url + issue.key)
+        bot.send_message(chat_id, prepare_msg_by_issue(issue))
 
 
 def create_task(inf):
@@ -58,7 +81,7 @@ def command_help(message):
 @bot.message_handler(commands=['nearest'])
 def command_help(message):
     filter = {'status': 'assignedtoview'}
-    found_issues = tr.find(request='', filter=filter)
+    found_issues = tr.find(request='', filter=filter, order=['datetimeview'])
     send_issues_list(message.chat.id, found_issues)
 
 
@@ -83,7 +106,14 @@ def command_default(message):
             found_issues = tr.find(inf['adv_id'])
             send_issues_list(message.chat.id, found_issues)
     else:
-        bot.send_message(message.chat.id, 'Не похоже на URL объявления. /help')
+        bot.send_message(message.chat.id,
+                         'Не похоже на урл. Попробую поискать в трекере. /help')
+        found_issues = tr.find(message.text)
+        if found_issues:
+            bot.send_message(message.chat.id,
+                             'Вот что удалось найти')
+            send_issues_list(message.chat.id, found_issues)
+        bot.send_message(message.chat.id, '-------')
 
 
 if __name__ == '__main__':
