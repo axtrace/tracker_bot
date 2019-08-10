@@ -8,7 +8,7 @@ from url_manager import UrlManager
 from tracker import Tracker
 from adv_info_extractor import AdvInfoExtractor
 
-apihelper.proxy = {'http': 'http://10.10.1.10:3128'}
+# apihelper.proxy = {'http': 'http://10.10.1.10:3128'}
 
 t = TokenLoader()
 token = t.get('telegram_token')
