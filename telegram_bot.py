@@ -1,7 +1,5 @@
 import telebot
-from telebot import apihelper
 import time
-from telebot import types
 
 from token_loader import TokenLoader
 from url_manager import UrlManager
