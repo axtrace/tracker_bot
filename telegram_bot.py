@@ -43,6 +43,8 @@ def prepare_msg_by_issue(issue):
         msg += issue.phone + '\n'
     if issue.agentname is not None:
         msg += issue.agentname + '\n'
+    if issue.price is not None:
+        msg += issue.price + '\n'
     if issue.datetimeview is not None and issue.datetimeview != '':
         utc_datetime = datetime.strptime(issue.datetimeview,
                                          '%Y-%m-%dT%H:%M:%S.%f%z')
