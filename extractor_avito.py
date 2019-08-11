@@ -20,6 +20,7 @@ class Avito(object):
         res['phone'] = self.get_digits_by_key('offerPhone', '\+\d+')
         res['price'] = self.get_digits_by_key('price')
         res['adv_id'] = self.get_digits_by_key('avito.item.id')
+
         res['build_year'] = self.get_digits_by_key('buildYear')
         return res
 
@@ -31,9 +32,14 @@ class Avito(object):
         return ''
 
     def get_digits_by_key(self, key, digit_regex='\d+'):
-        regex = re.compile(key + '\":\"?' + digit_regex)
         text = self.text
-        found = re.search(regex, text)
+
+        middle_parts = ('\":\"?', ' = \'')
+        for mpart in middle_parts:
+            regex = re.compile(key + mpart + digit_regex)
+            found = re.search(regex, text)
+            if found is not None:
+                break
         if found is None:
             return ''
         found = found.group(0)
@@ -41,11 +47,10 @@ class Avito(object):
         found = re.search(regex2, found)
         if found is None:
             return ''
-        print("get_digits_by", key, found.group(0))
         return found.group(0)
 
 
 if __name__ == "__main__":
-    avito_url = r'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/3-k_kvartira_80.6_m_1017_et._1114532904'
+    avito_url = r'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/2-k_kvartira_70.7_m_1422_et._1785177086?utm_campaign=native&utm_medium=item_page_android&utm_source=soc_sharing'
     c = Avito()
     print(c.extract_info(avito_url))

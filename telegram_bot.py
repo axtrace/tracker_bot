@@ -55,9 +55,26 @@ def prepare_msg_by_issue(issue):
     return msg
 
 
-def send_issues_list(chat_id, found_issues, ):
+def send_issues_list(chat_id, found_issues, count_limit):
+    cl = count_limit
     for issue in found_issues:
         bot.send_message(chat_id, prepare_msg_by_issue(issue))
+        cl += 1
+        if cl > count_limit:
+            return
+    bot.send_message(chat_id, '-------')
+
+
+def add_issue_if_no_exists(url):
+    inf = prepare_info(adv_ex.get_info(url), url)
+    found_issues = tr.find(inf['adv_id'])
+    code = 0
+    if found_issues:
+        code = 1
+    else:
+        create_task(inf)
+        found_issues = tr.find(inf['adv_id'])
+    return code, found_issues
 
 
 def create_task(inf):
@@ -83,7 +100,7 @@ def command_help(message):
 def command_help(message):
     filter = {'status': 'assignedtoview'}
     found_issues = tr.find(request='', filter=filter, order=['datetimeview'])
-    send_issues_list(message.chat.id, found_issues)
+    send_issues_list(message.chat.id, found_issues, 3)
 
 
 @bot.message_handler(func=lambda message: True,
@@ -95,26 +112,21 @@ def command_default(message):
         return 0
     url = um.extract_url(message.text)
     if url is not None:
-        inf = prepare_info(adv_ex.get_info(url), url)
-        found_issues = tr.find(inf['adv_id'])
-        if found_issues:
+        already_exist, found_issues = add_issue_if_no_exists(url)
+        if already_exist:
             bot.send_message(message.chat.id,
                              'Кажется, уже что-то похожее есть')
             send_issues_list(message.chat.id, found_issues)
         else:
-            create_task(inf)
             bot.send_message(message.chat.id, 'Добавил:')
-            found_issues = tr.find(inf['adv_id'])
             send_issues_list(message.chat.id, found_issues)
     else:
         bot.send_message(message.chat.id,
                          'Не похоже на урл. Попробую поискать в трекере. /help')
         found_issues = tr.find(message.text)
         if found_issues:
-            bot.send_message(message.chat.id,
-                             'Вот что удалось найти')
+            bot.send_message(message.chat.id, 'Вот что удалось найти')
             send_issues_list(message.chat.id, found_issues)
-        bot.send_message(message.chat.id, '-------')
 
 
 if __name__ == '__main__':

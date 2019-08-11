@@ -17,7 +17,8 @@ class UrlManager(object):
         return None
 
     def extract_url(self, text):
-        url = re.search(self.url_regex, text)
+        url = text.split('?')[0]
+        url = re.search(self.url_regex, url)
         if url is None:
             return None
         return url.group(0)
@@ -26,6 +27,6 @@ class UrlManager(object):
 if __name__ == '__main__':
     um = UrlManager()
     text = r'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/2-k_kvartira_70.7_m_1422_et._1785177086?utm_campaign=native&utm_medium=item_page_android&utm_source=soc_sharing'
-    # text = 'afdsfasdsdsfdadffdsaasf'
+    # text = 'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/2-k_kvartira_70.7_m_1422_et._1785177086'
     print(um.extract_url(text))
     print(um.get_url_type(um.extract_url(text)))

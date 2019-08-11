@@ -19,7 +19,6 @@ class YandexRealty(object):
         res['title'] = self.get_title()
         res['phone'] = self.get_digits_by_key('offerPhone', '\+\d+')
         res['price'] = self.get_digits_by_key('price')
-        # res['adv_id'] = self.get_digits_by_key('cianId'
         res['adv_id'] = url.replace('/', ' ').split()[-1]
         res['build_year'] = self.get_digits_by_key('buildYear')
         return res

@@ -25,7 +25,7 @@ class AdvInfoExtractor(object):
 
 if __name__ == "__main__":
     cian_url = r'https://krasnogorsk.cian.ru/sale/flat/213886732/'
-    avito_url = r'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/3-k_kvartira_80.6_m_1017_et._1114532904'
+    avito_url = r'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/2-k_kvartira_70.7_m_1422_et._1785177086?utm_campaign=native&utm_medium=item_page_android&utm_source=soc_sharing'
     yandex_realty_url = r'https://realty.yandex.ru/offer/9132688428970246657/'
 
     a = AdvInfoExtractor()
