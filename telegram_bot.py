@@ -84,6 +84,31 @@ def create_task(inf):
                    )
 
 
+def url_add_handler(chat_id, url):
+    already_exist, found_issues = add_issue_if_no_exists(url)
+    if already_exist:
+        bot.send_message(chat_id, 'Кажется, уже что-то похожее есть:')
+        send_issues_list(chat_id, found_issues, 3)
+    else:
+        bot.send_message(chat_id, 'Добавил:')
+        send_issues_list(chat_id, found_issues, 3)
+
+
+def try_to_find_handler(chat_id, text):
+    bot.send_message(chat_id,
+                     'Не похоже на урл. Попробую поискать в трекере. /help')
+    found_issues = tr.find(text)
+    if found_issues:
+        bot.send_message(chat_id, 'Вот что удалось найти')
+        send_issues_list(chat_id, found_issues, 0)
+    else:
+        bot.send_message(chat_id, 'Ничего похожего не нашел')
+
+
+def is_user_allowed(message):
+    return message.from_user.id in allowed_ids
+
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
     bot.send_message(message.chat.id,
@@ -106,27 +131,14 @@ def command_help(message):
 @bot.message_handler(func=lambda message: True,
                      content_types=['text'])
 def command_default(message):
-    if not message.chat.id in allowed_ids:
-        bot.send_message(message.chat.id,
-                         'Извините, вы не в списке доверенных лиц :(')
+    if not is_user_allowed(message):
+        bot.send_message(message.chat.id, 'Вы не в списке доверенных лиц :(')
         return 0
     url = um.extract_url(message.text)
     if url is not None:
-        already_exist, found_issues = add_issue_if_no_exists(url)
-        if already_exist:
-            bot.send_message(message.chat.id,
-                             'Кажется, уже что-то похожее есть')
-            send_issues_list(message.chat.id, found_issues, 3)
-        else:
-            bot.send_message(message.chat.id, 'Добавил:')
-            send_issues_list(message.chat.id, found_issues, 3)
+        url_add_handler(message.chat.id, url)
     else:
-        bot.send_message(message.chat.id,
-                         'Не похоже на урл. Попробую поискать в трекере. /help')
-        found_issues = tr.find(message.text)
-        if found_issues:
-            bot.send_message(message.chat.id, 'Вот что удалось найти')
-            send_issues_list(message.chat.id, found_issues, 0)
+        try_to_find_handler(message.chat.id, message.text)
 
 
 if __name__ == '__main__':
