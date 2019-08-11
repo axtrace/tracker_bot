@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # task = t.get_task('FLAT-20')
     # print(t.find('FLAT-38'))
 
-    print(t.find_existing(d))
+    print(t.find('Created: >= now()  - "10m" and Author: me() '))
     # d = {'summary': 'test2', "queue": {"id": "7"}, "ad_url": "https:test.com"}
     # issue = t.create_task(summary='TestTestTest222', ad_url=cian_url)
     # print(issue)

@@ -74,6 +74,7 @@ def add_issue_if_no_exists(url):
     else:
         create_task(inf)
         # found_issues = tr.find(inf['adv_id'])
+        time.sleep(2)
         found_issues = tr.find('Created: >= now()  - "1m" and Author: me() ')
     return code, found_issues
 
