@@ -59,8 +59,8 @@ def send_issues_list(chat_id, found_issues, count_limit):
     cl = count_limit
     for issue in found_issues:
         bot.send_message(chat_id, prepare_msg_by_issue(issue))
-        cl += 1
-        if cl > count_limit:
+        cl -= 1
+        if cl == 0:
             return
     bot.send_message(chat_id, '-------')
 
@@ -116,17 +116,17 @@ def command_default(message):
         if already_exist:
             bot.send_message(message.chat.id,
                              'Кажется, уже что-то похожее есть')
-            send_issues_list(message.chat.id, found_issues)
+            send_issues_list(message.chat.id, found_issues, 3)
         else:
             bot.send_message(message.chat.id, 'Добавил:')
-            send_issues_list(message.chat.id, found_issues)
+            send_issues_list(message.chat.id, found_issues, 3)
     else:
         bot.send_message(message.chat.id,
                          'Не похоже на урл. Попробую поискать в трекере. /help')
         found_issues = tr.find(message.text)
         if found_issues:
             bot.send_message(message.chat.id, 'Вот что удалось найти')
-            send_issues_list(message.chat.id, found_issues)
+            send_issues_list(message.chat.id, found_issues, 0)
 
 
 if __name__ == '__main__':
