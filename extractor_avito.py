@@ -41,6 +41,7 @@ class Avito(object):
         found = re.search(regex2, found)
         if found is None:
             return ''
+        print(f'get_digits_by_{key}: ', found.group(0))
         return found.group(0)
 
 

@@ -1,18 +1,19 @@
+import sys
 import telebot
 import time
 import pytz
-from dateutil.parser import parse
 from datetime import datetime
-from telebot import apihelper
-from token_loader import TokenLoader
+from json_loader import JsonLoader
 from url_manager import UrlManager
 from tracker import Tracker
 from adv_info_extractor import AdvInfoExtractor
 
 # apihelper.proxy = {'http': 'http://10.10.1.10:3128'}
 
-t = TokenLoader()
-token = t.get('telegram_token')
+
+t = JsonLoader()
+mode = '--prod' if '--prod' in sys.argv else 'test'
+token = t.get_telegram_token(mode)
 bot = telebot.TeleBot(token)
 um = UrlManager()
 tr = Tracker()
@@ -93,7 +94,7 @@ def command_default(message):
                          'Извините, вы не в списке доверенных лиц :(')
         return 0
     url = um.extract_url(message.text)
-    if not url is None:
+    if url is not None:
         inf = prepare_info(adv_ex.get_info(url), url)
         found_issues = tr.find(inf['adv_id'])
         if found_issues:
