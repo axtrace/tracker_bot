@@ -68,9 +68,9 @@ def send_issues_list(chat_id, found_issues, count_limit):
 def add_issue_if_no_exists(url):
     inf = prepare_info(adv_ex.get_info(url), url)
     found_issues = tr.find(inf['adv_id'])
-    code = 0
+    code = False
     if found_issues:
-        code = 1
+        code = True
     else:
         create_task(inf)
         found_issues = tr.find(inf['adv_id'])
