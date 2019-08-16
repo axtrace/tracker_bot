@@ -39,10 +39,13 @@ class Tracker(object):
         return res
 
     def find_existing(self, inf):
-        request = self._request_preparer(inf)
-        if request == '':
+        try:
+            request = self._request_preparer(inf)
+            if request == '':
+                return []
+            return self.find(request)
+        except Exception as e:
             return []
-        return self.find(request)
 
     def find(self, request, filter='', order=''):
         if filter == '' and order == '':

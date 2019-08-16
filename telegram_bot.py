@@ -3,6 +3,8 @@ import telebot
 import time
 import pytz
 from datetime import datetime
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 from json_loader import JsonLoader
 from url_manager import UrlManager
 from tracker import Tracker
@@ -20,6 +22,15 @@ tr = Tracker()
 adv_ex = AdvInfoExtractor()
 
 allowed_ids = set([214777789, 35846529])
+current_message = dict()
+
+
+def gen_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(
+        InlineKeyboardButton("Добавить все равно", callback_data="add_anyway"))
+    return markup
 
 
 def prepare_info(adv_info, url):
@@ -31,6 +42,7 @@ def prepare_info(adv_info, url):
     res['adv_id'] = adv_info.get('adv_id', '')
     res['build_year'] = adv_info.get('build_year', '')
     res['url'] = url
+    res['description'] = url
     return res
 
 
@@ -82,7 +94,7 @@ def add_issue_if_no_exists(url):
 
 
 def create_task(inf):
-    tr.create_task(summary=inf['title'], description=inf['url'],
+    tr.create_task(summary=inf['title'], description=inf['description'],
                    ad_url=inf['url'], price=inf['price'],
                    phone=inf['phone']
                    )
@@ -96,7 +108,7 @@ def url_add_handler(chat_id, url):
         # todo: Add ADV anyway
     else:
         bot.send_message(chat_id, 'Добавил:')
-        send_issues_list(chat_id, found_issues, 3)
+        send_issues_list(chat_id, found_issues, 1)
 
 
 def try_to_find_handler(chat_id, text):
@@ -104,14 +116,31 @@ def try_to_find_handler(chat_id, text):
                      'Не похоже на урл. Попробую поискать в трекере. /help')
     found_issues = tr.find(text)
     if found_issues:
-        bot.send_message(chat_id, 'Вот что удалось найти')
+        bot.send_message(chat_id, 'Вот что удалось найти',
+                         reply_markup=gen_markup())
         send_issues_list(chat_id, found_issues, 0)
     else:
-        bot.send_message(chat_id, 'Ничего похожего не нашел')
+        bot.send_message(chat_id, 'Ничего похожего не нашел',
+                         reply_markup=gen_markup())
 
 
 def is_user_allowed(message):
     return message.from_user.id in allowed_ids
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    if call.data == "add_anyway":
+        inf = {'title': 'Квартира XXX'}
+        inf['description'] = current_message.get(call.message.from_user.id, '')
+        inf['price'] = 0
+        inf['phone'] = ''
+        inf['url'] = 'https://tracker.yandex.ru/'
+        create_task(inf)
+        time.sleep(1)
+        found_issues = tr.find('Created: >= now()  - "1m" and Author: me() ')
+        bot.answer_callback_query(call.id, "Добавил")
+        send_issues_list(call.message.chat.id, found_issues, 3)
 
 
 @bot.message_handler(commands=['start'])
@@ -140,6 +169,7 @@ def command_default(message):
         bot.send_message(message.chat.id, 'Вы не в списке доверенных лиц :(')
         return 0
     url = um.extract_url(message.text)
+    current_message[message.from_user.id] = message.text
     if url is not None:
         url_add_handler(message.chat.id, url)
     else:
