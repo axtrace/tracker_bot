@@ -25,8 +25,4 @@ class UrlManager(object):
 
 
 if __name__ == '__main__':
-    um = UrlManager()
-    text = r'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/2-k_kvartira_70.7_m_1422_et._1785177086?utm_campaign=native&utm_medium=item_page_android&utm_source=soc_sharing'
-    # text = 'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/2-k_kvartira_70.7_m_1422_et._1785177086'
-    print(um.extract_url(text))
-    print(um.get_url_type(um.extract_url(text)))
+    pass

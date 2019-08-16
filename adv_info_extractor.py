@@ -12,23 +12,16 @@ class AdvInfoExtractor(object):
     def get_info(self, url):
         um = url_manager.UrlManager()
         type = um.get_url_type(url)
+        default_info = {'title': 'Квартира',
+                        'url': url}
         if type == ut.cian_type:
             return extractor_cian.Cian().extract_info(url)
         elif type == ut.yandex_type:
             return yareal.YandexRealty().extract_info(url)
         elif type == ut.avito_type:
             return extractor_avito.Avito().extract_info(url)
-        else:
-            pass
-        return ''
+        return default_info
 
 
 if __name__ == "__main__":
-    cian_url = r'https://krasnogorsk.cian.ru/sale/flat/213886732/'
-    avito_url = r'https://www.avito.ru/moskovskaya_oblast_krasnogorsk/kvartiry/2-k_kvartira_70.7_m_1422_et._1785177086?utm_campaign=native&utm_medium=item_page_android&utm_source=soc_sharing'
-    yandex_realty_url = r'https://realty.yandex.ru/offer/9132688428970246657/'
-
-    a = AdvInfoExtractor()
-    print(a.get_info(cian_url))
-    print(a.get_info(avito_url))
-    print(a.get_info(yandex_realty_url))
+    pass

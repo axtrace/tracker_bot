@@ -70,15 +70,15 @@ def send_issues_list(chat_id, found_issues, count_limit):
 def add_issue_if_no_exists(url):
     inf = prepare_info(adv_ex.get_info(url), url)
     found_issues = tr.find_existing(inf)
-    code = False
+    is_already_exists = False
     if found_issues:
-        code = True
+        is_already_exists = True
     else:
         create_task(inf)
         # found_issues = tr.find(inf['adv_id'])
-        time.sleep(2)
+        time.sleep(1)
         found_issues = tr.find('Created: >= now()  - "1m" and Author: me() ')
-    return code, found_issues
+    return is_already_exists, found_issues
 
 
 def create_task(inf):
@@ -93,6 +93,7 @@ def url_add_handler(chat_id, url):
     if already_exist:
         bot.send_message(chat_id, 'Кажется, уже что-то похожее есть:')
         send_issues_list(chat_id, found_issues, 3)
+        # todo: Add ADV anyway
     else:
         bot.send_message(chat_id, 'Добавил:')
         send_issues_list(chat_id, found_issues, 3)
